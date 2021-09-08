@@ -1,0 +1,1 @@
+# admin-server-k8s-discovery
