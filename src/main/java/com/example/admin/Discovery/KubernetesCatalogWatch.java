@@ -18,11 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.discovery.event.HeartbeatEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
-/**
- * @author Oleg Vyukov
- */
+@EnableScheduling
 public class KubernetesCatalogWatch implements ApplicationEventPublisherAware {
 
     private static final Logger logger = LoggerFactory

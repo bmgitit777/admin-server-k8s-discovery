@@ -13,7 +13,7 @@ spring:
         catalogServicesWatchDelay: 5000
       discovery:
         service-labels:
-          type: manage
+          type: actuator
 
 server:
   port: 8080
@@ -22,7 +22,7 @@ management:
     web:
       exposure:
         include: "*"
-      base-path: /manage
+#      base-path: /manage
   endpoint:
     health:
       enabled: true
@@ -32,5 +32,5 @@ management:
 
 logging:
   level:
-    org.springframework.cloud.kubernetes: DEBUG
+    org.springframework.cloud.kubernetes: TRACE
     de.codecentric.boot.admin.discovery.ApplicationDiscoveryListener: DEBUG
