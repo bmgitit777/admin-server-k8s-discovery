@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: spring-boot-admin
+  boot:
+    admin:
+      ui:
+        brand: "PSF"
+        title: "PSF Spring Boot Admin"
+  cloud:
+    kubernetes:
+      catalog-services-watch:
+        enabled: true
+        catalogServicesWatchDelay: 5000
+      discovery:
+        service-labels:
+          type: actuator
+
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  server:
+    port: 8081
+
+logging:
+  level:
+    org.springframework.cloud.kubernetes: TRACE
+    de.codecentric.boot.admin.discovery.ApplicationDiscoveryListener: DEBUG

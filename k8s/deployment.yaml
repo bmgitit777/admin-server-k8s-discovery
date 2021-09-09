@@ -1,0 +1,131 @@
+  - kind: ServiceAccount
+    apiVersion: v1
+    metadata:
+      name: spring-boot-admin-sa
+      labels:
+        app: spring-boot-admin
+
+  - kind: Role
+    apiVersion: v1
+    metadata:
+      name: spring-boot-admin-role
+      labels:
+        app: spring-boot-admin
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+          - endpoints
+          - services
+        verbs:
+          - get
+          - list
+          - watch
+
+  - kind: RoleBinding
+    apiVersion: authorization.openshift.io/v1
+    metadata:
+      name: spring-boot-admin-role-binding
+      namespace: ${PROJECTNAME}
+      labels:
+        app: spring-boot-admin
+    subjects:
+      - kind: ServiceAccount
+        name: spring-boot-admin-sa
+        namespace: ${PROJECTNAME}
+    roleRef:
+      kind: Role
+      name: spring-boot-admin-role
+      namespace: ${PROJECTNAME}
+      
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      labels:
+        app: spring-boot-admin
+      name: spring-boot-admin
+    spec:
+      port:
+        targetPort: 8080-tcp
+      to:
+        kind: Service
+        name: spring-boot-admin-webservice
+        weight: 100
+
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: spring-boot-admin-webservice
+      labels:
+        app: spring-boot-admin
+    spec:
+      ports:
+        - name: 8080-tcp
+          protocol: TCP
+          port: 8080
+          targetPort: 8080
+      selector:
+        app: spring-boot-admin
+
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: spring-boot-admin-actuator
+      labels:
+        app: spring-boot-admin
+        type: actuator
+    spec:
+      ports:
+        - name: 8081-tcp
+          protocol: TCP
+          port: 8081
+          targetPort: 8081
+      selector:
+        app: spring-boot-admin
+
+  - apiVersion: apps.openshift.io/v1
+    kind: DeploymentConfig
+    metadata:
+      labels:
+        app: spring-boot-admin
+      name: spring-boot-admin
+    spec:
+      replicas: 1
+      selector:
+        app: spring-boot-admin
+        deploymentconfig: spring-boot-admin
+      strategy:
+        activeDeadlineSeconds: 21600
+        recreateParams:
+          timeoutSeconds: 600
+        resources: {}
+        type: Recreate
+      template:
+        metadata:
+          labels:
+            app: spring-boot-admin
+            deploymentconfig: spring-boot-admin
+        spec:
+          serviceAccountName: spring-boot-admin-sa # <- Using our defined service account
+          containers:
+              name: spring-boot-admin
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+                - containerPort: 8081 # <- exposing the management port
+                  protocol: TCP
+          terminationGracePeriodSeconds: 30
+      triggers:
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - spring-boot-admin
+            from:
+              kind: ImageStreamTag
+              name: psf-spring-boot-admin:latest
+              namespace: demo
+          type: ImageChange
+        - type: ConfigChange
+
+        
