@@ -74,7 +74,7 @@
       name: spring-boot-admin-actuator
       labels:
         app: spring-boot-admin
-        type: actuator
+        type: manage
     spec:
       ports:
         - name: 8081-tcp

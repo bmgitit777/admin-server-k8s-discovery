@@ -49,24 +49,20 @@ public class KubernetesCatalogWatch implements ApplicationEventPublisherAware {
         try {
             List<String> previousState = this.catalogEndpointsState.get();
 
-            // not all pods participate in the service discovery. only those that have
-            // endpoints.
+            // not all pods participate in the service discovery. only those that have endpoints.
             List<Endpoints> endpoints = this.kubernetesClient.endpoints().list()
                     .getItems();
             List<String> endpointsPodNames = endpoints.stream().map(Endpoints::getSubsets)
                     .filter(Objects::nonNull).flatMap(Collection::stream)
                     .map(EndpointSubset::getAddresses).filter(Objects::nonNull)
                     .flatMap(Collection::stream).map(EndpointAddress::getTargetRef)
-                    .filter(Objects::nonNull).map(ObjectReference::getName) // pod name
-                    // unique in
-                    // namespace
+                    .filter(Objects::nonNull).map(ObjectReference::getName) // pod name, unique in, namespace
                     .sorted(String::compareTo).collect(Collectors.toList());
 
             this.catalogEndpointsState.set(endpointsPodNames);
 
             if (!endpointsPodNames.equals(previousState)) {
-                logger.trace("Received endpoints update from kubernetesClient: {}",
-                        endpointsPodNames);
+                logger.trace("Received endpoints update from kubernetesClient: {}", endpointsPodNames);
                 this.publisher.publishEvent(new HeartbeatEvent(this, endpointsPodNames));
             }
         }
